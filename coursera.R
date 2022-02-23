@@ -35,6 +35,8 @@ prefsAB$Pref = factor(prefsAB$Pref) # Rv4
 summary(prefsAB)
 plot(prefsAB$Pref)
 
+# View(prefsAB)
+
 # Pearson chi-square test
 prfs = xtabs( ~ Pref, data=prefsAB)
 prfs # show counts
@@ -56,14 +58,22 @@ prfs = xtabs( ~ Pref, data=prefsABC)
 prfs # show counts
 chisq.test(prfs)
 
+# we did the chi sq test. its an asymptotic test. so we have to do an exact
+# test
 # multinomial test
 library(XNomial)
+# you can get the documentation of a function with ?nameofthefunction
 xmulti(prfs, c(1/3, 1/3, 1/3), statName="Prob")
 
 # post hoc binomial tests with correction for multiple comparisons
+# holm sequence bonforony procedure. 
+# if any of these > 0.05 this procedure stops
 aa = binom.test(sum(prefsABC$Pref == "A"), nrow(prefsABC), p=1/3)
 bb = binom.test(sum(prefsABC$Pref == "B"), nrow(prefsABC), p=1/3)
-cc = binom.test(sum(prefsABC$Pref == "C"), nrow(prefsABC), p=1/3)
+cc = binom.test(sum(prefsABC$Pref == "C"), nrow(prefsABC), p=1/3)  
+
+# we do this to adjust the p values, to correct the results getting by chance. 
+# bonferoni adjustment. 
 p.adjust(c(aa$p.value, bb$p.value, cc$p.value), method="holm")
 
 
@@ -84,11 +94,13 @@ prfs = xtabs( ~ Pref + Sex, data=prefsABsex) # the '+' sign indicates two vars
 View(prfs)
 chisq.test(prfs)
 
-# G-test, asymptotic like chi-square
+ # G-test, asymptotic like chi-square
 library(RVAideMemoire)
 G.test(prfs)
 
 # Fisher's exact test
+# this is an exact test. 
+# can be used any # of sample test (n*r) to calculate the p value
 fisher.test(prfs)
 
 # revisit our data file with 3 response categories, but now with sex (M/F)
@@ -144,6 +156,7 @@ summary(pgviews)
 
 # descriptive statistics by Site
 library(plyr)
+# ddply allows us to apply a function on a dataframe
 ddply(pgviews, ~ Site, function(data) summary(data$Pages))
 ddply(pgviews, ~ Site, summarise, Pages.mean=mean(Pages), Pages.sd=sd(Pages))
 
